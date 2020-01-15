@@ -9,7 +9,6 @@ from pprint import pprint
 
 from colorama import init
 
-import settings
 import dfp.associate_line_items_and_creatives
 import dfp.create_custom_targeting
 import dfp.create_creatives
@@ -261,7 +260,7 @@ class color:
    UNDERLINE = '\033[4m'
    END = '\033[0m'
 
-def main():
+def main(settings):
   """
   Validate the settings and ask for confirmation from the user. Then,
   start all necessary DFP tasks.
