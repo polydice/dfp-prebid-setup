@@ -27,14 +27,6 @@ DFP_TARGETED_AD_UNIT_NAMES = []
 # Sizes of placements. These are used to set line item and creative sizes.
 DFP_PLACEMENT_SIZES = []
 
-# If DFP_VIDEO_AD_TYPE is set to False, traditional ad units will be created.
-# If it is set to True, video ad units and creatives will be created instead.
-# When creating video ad units, you also need to fill the DFP_VAST_REDIRECT_URL value.
-DFP_VIDEO_AD_TYPE = False
-
-# Redirect URL for video creatives.
-DFP_VAST_REDIRECT_URL = ''
-
 # Whether we should create the advertiser in DFP if it does not exist.
 # If False, the program will exit rather than create an advertiser.
 DFP_CREATE_ADVERTISER_IF_DOES_NOT_EXIST = False
@@ -58,7 +50,7 @@ DFP_NUM_CREATIVES_PER_LINE_ITEM = 1
 
 # Optional
 # The currency to use in DFP when setting line item CPMs. Defaults to 'USD'.
-DFP_CURRENCY_CODE = 'TWD'
+DFP_CURRENCY_CODE = 'USD'
 
 # Optional
 # The format for line item name. Defaults to u'{bidder_code}: HB ${price}'.
@@ -79,8 +71,8 @@ PREBID_BIDDER_CODE = None
 PREBID_PRICE_BUCKETS = {
     'precision': 2,
     'min': 0,
-    'max': 150,
-    'increment': 2
+    'max': 20,
+    'increment': 0.10,
 }
 
 #########################################################################

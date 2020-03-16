@@ -35,7 +35,7 @@ def get_order_service():
 
 
 def get_orders_by_advertiser(advertiserId, print_orders=False):
-    statement = (ad_manager.StatementBuilder(version=VERSION) .Where("status in ('DRAFT', 'PENDING_APPROVAL') \
+    statement = (ad_manager.StatementBuilder(version=VERSION).Where("status in ('DRAFT', 'PENDING_APPROVAL') \
                          AND advertiserId = :advertiserId \
                          AND isArchived = FALSE")
                  .WithBindVariable('advertiserId', advertiserId))

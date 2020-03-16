@@ -7,6 +7,7 @@ from itertools import count
 from sys import argv, exit
 
 import settings
+import settings_amp
 from dfp.exceptions import (
     BadSettingException,
     MissingSettingException
@@ -88,7 +89,7 @@ def parse_adunits_csv():
 
 
 def create_new_settings(adunit_name, ad_network, size):
-    result = settings
+    result = settings_amp if 'AMP' in adunit_name else settings
 
     advertiser_name = get_advertiser_name(ad_network)
     bidder_code = BIDDER_CODES[ad_network]
