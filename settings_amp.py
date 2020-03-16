@@ -50,7 +50,7 @@ DFP_NUM_CREATIVES_PER_LINE_ITEM = 1
 
 # Optional
 # The currency to use in DFP when setting line item CPMs. Defaults to 'USD'.
-DFP_CURRENCY_CODE = 'TWD'
+DFP_CURRENCY_CODE = 'USD'
 
 # Optional
 # The format for line item name. Defaults to u'{bidder_code}: HB ${price}'.
@@ -71,8 +71,8 @@ PREBID_BIDDER_CODE = None
 PREBID_PRICE_BUCKETS = {
     'precision': 2,
     'min': 0,
-    'max': 150,
-    'increment': 2
+    'max': 20,
+    'increment': 0.10,
 }
 
 #########################################################################
