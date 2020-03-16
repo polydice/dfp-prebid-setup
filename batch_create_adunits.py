@@ -52,10 +52,9 @@ def get_advertiser_name(ad_network):
         return ad_network
 
 
-def parse_adunits_csv(target_advertiser):
+def parse_adunits_csv():
     """
         Parse and refine raw adunits CSV file
-        wrt. target_advertiser.
     """
 
     def parse_label_fields(row):
@@ -67,11 +66,6 @@ def parse_adunits_csv(target_advertiser):
 
         Label = parse_label_fields(input_data[0])
         input_data = input_data[1:]
-
-        input_data = list(filter(
-            lambda row: row[Label.adnetwork] == target_advertiser,
-            input_data
-        ))
 
         ad_networks = []
         ad_units = []
@@ -118,7 +112,7 @@ def create_new_settings(adunit_name, ad_network, size):
 def main():
     count = 0
 
-    targeting_sheets = parse_adunits_csv(argv[1])
+    targeting_sheets = parse_adunits_csv()
     ad_units = targeting_sheets["ad_units"]
     sizes = targeting_sheets["sizes"]
     ad_networks = targeting_sheets["ad_networks"]
