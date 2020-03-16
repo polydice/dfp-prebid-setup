@@ -9,3 +9,5 @@ secret-files.tar
 local_settings.py
 
 .vscode/
+
+adunits.csv
