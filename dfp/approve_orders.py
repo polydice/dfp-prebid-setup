@@ -19,25 +19,24 @@
 """
 
 
+import argparse
 import datetime
 from googleads import ad_manager
 from .client import get_client
-
-
-ACTION = 'ApproveOrders'
-OPENX_ID = 4832733284
-VERSION = 'v201911'
+from .dfp_settings import *
 
 
 def get_order_service():
     dfp_client = get_client()
-    return dfp_client.GetService('OrderService', version=VERSION)
+    return dfp_client.GetService('OrderService', version=DFP_SERVICE_VERSION)
 
 
 def get_orders_by_advertiser(advertiserId, print_orders=False):
-    statement = (ad_manager.StatementBuilder(version=VERSION).Where("status in ('DRAFT', 'PENDING_APPROVAL') \
+    statement = (ad_manager.StatementBuilder(version=DFP_SERVICE_VERSION)
+                 .Where("status in ('DRAFT', 'PENDING_APPROVAL') \
                          AND advertiserId = :advertiserId \
-                         AND isArchived = FALSE")
+                         AND isArchived = FALSE \
+                         AND name LIKE 'Prebid %'")
                  .WithBindVariable('advertiserId', advertiserId))
 
     if print_orders:
@@ -62,11 +61,11 @@ def get_orders_by_advertiser(advertiserId, print_orders=False):
     return statement
 
 
-def main():
+def main(advertiserId):
     orders_approved = 0
 
     order_service = get_order_service()
-    statement = get_orders_by_advertiser(OPENX_ID)
+    statement = get_orders_by_advertiser(advertiserId)
 
     while True:
         statement_string = statement.ToStatement()
@@ -82,7 +81,7 @@ def main():
                 print(msg)
 
             result = order_service.performOrderAction(
-                {'xsi_type': ACTION},
+                {'xsi_type': 'ApproveOrders'},
                 statement_string
             )
             if result and int(result['numChanges']) > 0:
@@ -98,4 +97,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(
+        description='Approve orders')
+    parser.add_argument('--advertiserId', help='Advertiser / Company ID')
+
+    args = parser.parse_args()
+
+    if args.advertiserId:
+        main(args.advertiserId)

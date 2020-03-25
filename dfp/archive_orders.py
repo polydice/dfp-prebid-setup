@@ -14,50 +14,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-    This code first rename each target order then archive it.
-"""
-
-
-# Import appropriate modules from the client library.
+import argparse
 from googleads import ad_manager
 from .client import get_client
-
-VERSION = 'v201911'
-OPENX_ID = '4832733284'
-ACTION = 'ArchiveOrders'
-MARK = '(archived) '
+from .dfp_settings import *
 
 
 def get_order_service():
     dfp_client = get_client()
-    return dfp_client.GetService('OrderService', version=VERSION)
+    return dfp_client.GetService('OrderService', version=DFP_SERVICE_VERSION)
 
 
 def get_orders_by_advertiser(advertiserId):
-    statement = (ad_manager.StatementBuilder(version=VERSION)
+    statement = (ad_manager.StatementBuilder(version=DFP_SERVICE_VERSION)
                  .Where("advertiserId = :advertiserId \
                          AND isArchived = FALSE \
-                         AND name LIKE 'Prebid OpenX %'")
+                         AND name LIKE 'Prebid %'")
                  .WithBindVariable('advertiserId', advertiserId))
 
     return statement
 
 
-def get_archived_target_orders(advertiserId):
-    statement = (ad_manager.StatementBuilder(version=VERSION)
+def get_archived_target_orders(advertiserId, mark):
+    statement = (ad_manager.StatementBuilder(version=DFP_SERVICE_VERSION)
                  .Where("advertiserId = :advertiserId \
                          AND isArchived = FALSE \
-                         AND name LIKE '{}Prebid OpenX %'".format(MARK))
+                         AND name LIKE '{}Prebid %'".format(mark))
                  .WithBindVariable('advertiserId', advertiserId))
-
     return statement
 
 
-def mark_orders(order_service):
-
+def mark_orders(order_service, advertiserId, mark):
     # Get orders by statement.
-    orders_statement = get_orders_by_advertiser(OPENX_ID)
+    orders_statement = get_orders_by_advertiser(advertiserId)
     response = order_service.getOrdersByStatement(
         orders_statement.ToStatement())
 
@@ -66,8 +55,8 @@ def mark_orders(order_service):
         updated_orders = []
         for order in response['results']:
             # Archived orders cannot be updated.
-            if not order['isArchived'] and MARK not in order['name']:
-                order['name'] = MARK + order['name']
+            if not order['isArchived'] and mark not in order['name']:
+                order['name'] = mark + order['name']
                 updated_orders.append(order)
 
         # Update orders remotely.
@@ -80,11 +69,11 @@ def mark_orders(order_service):
                       .format(order['id'], order['name'], order['advertiserId']))
 
 
-def archive_orders(order_service):
+def archive_orders(order_service, advertiserId, mark):
     num_orders_archived = 0
 
     while True:
-        orders_statement = get_archived_target_orders(OPENX_ID)
+        orders_statement = get_archived_target_orders(advertiserId, mark)
         statement_string = orders_statement.ToStatement()
         response = order_service.getOrdersByStatement(statement_string)
 
@@ -97,7 +86,7 @@ def archive_orders(order_service):
                 print(msg)
 
             result = order_service.performOrderAction(
-                {'xsi_type': ACTION}, statement_string)
+                {'xsi_type': 'ArchiveOrders'}, statement_string)
 
             if result and int(result['numChanges']) > 0:
                 num_orders_archived += int(result['numChanges'])
@@ -111,11 +100,20 @@ def archive_orders(order_service):
         print('No orders were archived.')
 
 
-def main():
+def main(advertiserId, mark):
     order_service = get_order_service()
-    mark_orders(order_service)
-    archive_orders(order_service)
+    mark_orders(order_service, advertiserId, mark)
+    archive_orders(order_service, advertiserId, mark)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(
+        description='Rename(mark) orders then archive it')
+    parser.add_argument('--advertiserId', help='Advertiser / Company ID')
+    parser.add_argument('--mark', default='(archived)',
+                        help='Archive mark that will be prepended to order name')
+
+    args = parser.parse_args()
+
+    if args.advertiserId:
+        main(args.advertiserId, args.mark)
