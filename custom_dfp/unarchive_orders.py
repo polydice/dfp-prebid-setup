@@ -15,28 +15,30 @@
 # limitations under the License.
 
 """
-    This code approves all eligible draft and pending orders.
+    This code unarchives target orders.
 """
 
 
-import argparse
 import datetime
 from googleads import ad_manager
-from .client import get_client
-from .dfp_settings import *
+from dfp.client import get_client
+
+
+ACTION = 'UnarchiveOrders'
+OPENX_ID = 4832733284
+VERSION = 'v201911'
 
 
 def get_order_service():
     dfp_client = get_client()
-    return dfp_client.GetService('OrderService', version=DFP_SERVICE_VERSION)
+    return dfp_client.GetService('OrderService', version=VERSION)
 
 
 def get_orders_by_advertiser(advertiserId, print_orders=False):
-    statement = (ad_manager.StatementBuilder(version=DFP_SERVICE_VERSION)
-                 .Where("status in ('DRAFT', 'PENDING_APPROVAL') \
-                         AND advertiserId = :advertiserId \
-                         AND isArchived = FALSE \
-                         AND name LIKE 'Prebid %'")
+    statement = (ad_manager.StatementBuilder(version=VERSION)
+                 .Where("advertiserId = :advertiserId \
+                         AND isArchived = TRUE \
+                         AND name LIKE 'Prebid OpenX %'")
                  .WithBindVariable('advertiserId', advertiserId))
 
     if print_orders:
@@ -48,9 +50,10 @@ def get_orders_by_advertiser(advertiserId, print_orders=False):
             if 'results' in response and len(response['results']) > 0:
                 for order in response['results']:
                     # Print out some information for each order.
-                    msg = 'Found an order with ID {id} and name {name} was found.\n'.format(
+                    msg = 'Order with ID {id}, name {name}, isArchived={isArchived} was found.\n'.format(
                         id=order['id'],
-                        name=order['name']
+                        name=order['name'],
+                        isArchived=order['isArchived']
                     )
                     print(msg)
                 statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
@@ -61,19 +64,18 @@ def get_orders_by_advertiser(advertiserId, print_orders=False):
     return statement
 
 
-def main(advertiserId):
-    orders_approved = 0
-
-    order_service = get_order_service()
-    statement = get_orders_by_advertiser(advertiserId)
+def main():
+    orders_unarchived = 0
 
     while True:
+        order_service = get_order_service()
+        statement = get_orders_by_advertiser(OPENX_ID)
         statement_string = statement.ToStatement()
         response = order_service.getOrdersByStatement(statement_string)
 
         if 'results' in response and len(response['results']) > 0:
             for order in response['results']:
-                msg = 'Order with id "{id}", name "{name}", and status "{status}" will be approved.' \
+                msg = 'Order with id "{id}", name "{name}", and status "{status}" will be unarchived.' \
                     .format(
                         id=order['id'],
                         name=order['name'],
@@ -81,27 +83,20 @@ def main(advertiserId):
                 print(msg)
 
             result = order_service.performOrderAction(
-                {'xsi_type': 'ApproveOrders'},
-                statement_string
-            )
+                {'xsi_type': ACTION}, statement_string)
+
             if result and int(result['numChanges']) > 0:
-                orders_approved += int(result['numChanges'])
+                orders_unarchived += int(result['numChanges'])
+
             statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
         else:
             break
 
-    if orders_approved > 0:
-        print('Number of orders approved: %s' % orders_approved)
+    if orders_unarchived > 0:
+        print('Number of orders unarchived: {}'.format(orders_unarchived))
     else:
-        print('No orders were approved.')
+        print('No orders were unarchived.')
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Approve orders')
-    parser.add_argument('--advertiserId', help='Advertiser / Company ID')
-
-    args = parser.parse_args()
-
-    if args.advertiserId:
-        main(args.advertiserId)
+    main()

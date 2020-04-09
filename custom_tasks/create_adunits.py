@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import csv
-from enum import IntEnum
-from itertools import count
 from sys import argv, exit
-
 import settings
 import settings_amp
 from dfp.exceptions import (
@@ -13,6 +9,8 @@ from dfp.exceptions import (
     MissingSettingException
 )
 from tasks import add_new_prebid_partner
+
+from .parse_adunits_csv import *
 
 
 DFP_USER_EMAIL_ADDRESS = "albert@thepolydice.com"
@@ -31,7 +29,8 @@ BIDDER_CODES = {
     'AppNexus': 'appnexus',
     'Appier': 'appier',
     'Innity': 'innity',
-    'OpenX': 'openx'
+    'OpenX': 'openx',
+    'Teads': 'teads'
 }
 
 
@@ -46,6 +45,17 @@ def get_order_name(ad_network, adunit_name, width, height):
     return f"Prebid {new_ad_network} {adunit_name} {width}x{height}"
 
 
+def get_multisize_order_name(ad_network, adunit_name):
+    new_ad_network = ad_network
+
+    try:
+        new_ad_network = ORDER_DICT[ad_network]
+    except KeyError:
+        pass
+
+    return f"Prebid {new_ad_network} {adunit_name}"
+
+
 def get_advertiser_name(ad_network):
     try:
         return ADVERTISER_DICT[ad_network]
@@ -53,58 +63,29 @@ def get_advertiser_name(ad_network):
         return ad_network
 
 
-def parse_adunits_csv():
-    """
-        Parse and refine raw adunits CSV file
-    """
-
-    def parse_label_fields(row):
-        row_without_empty = list(map(lambda e: e.strip() or "None", row))
-        return IntEnum('Attr', zip(row_without_empty, count()))
-
-    with open('adunits.csv', newline='') as csvfile:
-        input_data = list(csv.reader(csvfile, delimiter=','))
-
-        Label = parse_label_fields(input_data[0])
-        input_data = input_data[1:]
-
-        ad_networks = []
-        ad_units = []
-        sizes = []
-
-        for row in input_data:
-            # print("\t".join([
-            #     row[Label.master_adunit],
-            #     row[Label.size]])
-            # )
-            ad_units.append(row[Label.master_adunit])
-            sizes.append(row[Label.size])
-            ad_networks.append(row[Label.adnetwork])
-
-        return {
-            'ad_units': ad_units,
-            'ad_networks': ad_networks,
-            'sizes': sizes
-        }
-
-
 def create_new_settings(adunit_name, ad_network, size):
     result = settings_amp if 'AMP' in adunit_name else settings
 
     advertiser_name = get_advertiser_name(ad_network)
     bidder_code = BIDDER_CODES[ad_network]
-    [width, height] = size.split("x")
 
-    order_name = get_order_name(ad_network, adunit_name, width, height)
+    placement_sizes = None
+    if "_" in size:
+        def transform(sz):
+            [w, h] = sz.split('x')
+            return {'width': w, 'height': h}
+        placement_sizes = list(map(transform, size.split('_')))
+        order_name = get_multisize_order_name(ad_network, adunit_name)
+    else:
+        [w, h] = size.split('x')
+        placement_sizes = [{'width': w, 'height': h}]
+        order_name = get_order_name(ad_network, adunit_name, w, h)
 
     result.DFP_USER_EMAIL_ADDRESS = DFP_USER_EMAIL_ADDRESS
     result.DFP_ORDER_NAME = order_name
     result.DFP_ADVERTISER_NAME = advertiser_name
     result.DFP_TARGETED_AD_UNIT_NAMES = [adunit_name]
-    result.DFP_PLACEMENT_SIZES = [{
-        'width': width,
-        'height': height
-    }]
+    result.DFP_PLACEMENT_SIZES = placement_sizes
     result.PREBID_BIDDER_CODE = bidder_code
 
     return result
@@ -119,12 +100,16 @@ def main():
     ad_networks = targeting_sheets["ad_networks"]
 
     for i, adunit_name in enumerate(ad_units):
+        if i > 0:
+            break
         try:
             new_settings = create_new_settings(
                 adunit_name,
                 ad_networks[i],
                 sizes[i]
             )
+            # new_settings.DFP_ORDER_NAME = '(TEST)' + \
+            #     new_settings.DFP_ORDER_NAME
             add_new_prebid_partner.main(new_settings)
             count += 1
         except (BadSettingException, MissingSettingException) as error:

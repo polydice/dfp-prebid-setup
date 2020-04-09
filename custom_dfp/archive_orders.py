@@ -16,7 +16,7 @@
 
 import argparse
 from googleads import ad_manager
-from .client import get_client
+from dfp.client import get_client
 from .dfp_settings import *
 
 
