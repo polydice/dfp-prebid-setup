@@ -1,3 +1,4 @@
+from googleads import ad_manager
 from dfp.client import get_client
 
 
@@ -21,7 +22,20 @@ class DfpServices:
     @classmethod
     def lica_service(cls):
         return cls.dfp_client.GetService(
-            'LineItemService', version=DFP_SERVICE_VERSION)
+            'LineItemCreativeAssociationService', version=DFP_SERVICE_VERSION)
+
+    @classmethod
+    def creative_service(cls):
+        return cls.dfp_client.GetService(
+            'CreativeService', version=DFP_SERVICE_VERSION)
+
+    @staticmethod
+    def statement():
+        return ad_manager.StatementBuilder(version=DFP_SERVICE_VERSION)
+
+
+def has_query_result(response):
+    return 'results' in response and len(response['results']) > 0
 
 
 if __name__ == "__main__":

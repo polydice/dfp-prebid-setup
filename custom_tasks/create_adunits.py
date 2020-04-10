@@ -100,8 +100,6 @@ def main():
     ad_networks = targeting_sheets["ad_networks"]
 
     for i, adunit_name in enumerate(ad_units):
-        if i > 0:
-            break
         try:
             new_settings = create_new_settings(
                 adunit_name,
@@ -120,4 +118,4 @@ def main():
 
 if __name__ == "__main__":
     total_uploaded_adunits = main()
-    print('{} ad units added.'.format(total_uploaded_adunits))
+    print('{} ad units was created.'.format(total_uploaded_adunits))

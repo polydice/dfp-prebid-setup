@@ -24,6 +24,7 @@ def parse_adunits_csv():
 
         for row in input_data:
             ad_units.append(row[Label.master_adunit])
+            # ad_units.append(row[Label.adnetwork_adunits])
             sizes.append(row[Label.size])
             ad_networks.append(row[Label.adnetwork])
 
