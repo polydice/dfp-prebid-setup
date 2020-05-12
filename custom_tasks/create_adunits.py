@@ -30,7 +30,8 @@ BIDDER_CODES = {
     'Appier': 'appier',
     'Innity': 'innity',
     'OpenX': 'openx',
-    'Teads': 'teads'
+    'Teads': 'teads',
+    'ucfunnel': 'ucfunnel'
 }
 
 

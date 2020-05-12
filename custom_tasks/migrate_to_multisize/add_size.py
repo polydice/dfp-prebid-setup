@@ -133,19 +133,19 @@ def add_size_to_line_items(response, sizes):
         line_item['creativePlaceholders'] = new_creative_placeholders
         updated_line_items.append(line_item)
 
-        if not DRY_RUN:
-            line_items = line_item_service.updateLineItems(
-                updated_line_items)
+    if not DRY_RUN:
+        line_items = line_item_service.updateLineItems(
+            updated_line_items)
 
-            if line_items:
-                for line_item in line_items:
-                    log("order {} - Line item with id {}, named {}, size: {} was updated".format(
-                        line_item['orderName'], line_item['id'], line_item['name'], line_item['creativePlaceholders'][0]['size']))
-            else:
-                log('No line items were updated.')
+        if line_items:
+            for line_item in line_items:
+                log("order {} - Line item with id {}, named {}, size: {} was updated".format(
+                    line_item['orderName'], line_item['id'], line_item['name'], line_item['creativePlaceholders'][0]['size']))
+        else:
+            log('No line items were updated.')
 
-        for i, line_item in enumerate(updated_line_items):
-            add_size_to_lica(line_item, sizes)
+    for i, line_item in enumerate(updated_line_items):
+        add_size_to_lica(line_item, sizes)
 
 
 def main(advertiserId):
