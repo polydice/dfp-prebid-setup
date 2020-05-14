@@ -3,6 +3,10 @@ from enum import IntEnum
 from itertools import count
 
 
+def remove_item_spaces(ls):
+    return list(map(lambda s: s.replace(' ', ''), ls))
+
+
 def parse_adunits_csv():
     """
         Parse and refine raw adunits CSV file
@@ -20,18 +24,29 @@ def parse_adunits_csv():
 
         ad_networks = []
         ad_units = []
+        adnetwork_units = []
         sizes = []
+        actual_sizes = []
 
         for row in input_data:
             ad_units.append(row[Label.master_adunit])
-            # ad_units.append(row[Label.adnetwork_adunits])
+            adnetwork_units.append(row[Label.adnetwork_adunits])
+
             sizes.append(row[Label.size])
+
+            if row[Label.size].lower() == 'sizeless':
+                actual_sizes.append(row[Label.real_sizes])
+            else:
+                actual_sizes.append(row[Label.size])
+
             ad_networks.append(row[Label.adnetwork])
 
         return {
             'ad_units': ad_units,
+            'adnetwork_units': adnetwork_units,
             'ad_networks': ad_networks,
-            'sizes': sizes
+            'sizes': remove_item_spaces(sizes),
+            'actual_sizes': remove_item_spaces(actual_sizes)
         }
 
 
