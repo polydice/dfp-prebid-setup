@@ -22,8 +22,9 @@
 import argparse
 import datetime
 from googleads import ad_manager
-from dfp.client import get_client
-from .dfp_settings import *
+from .services import *
+
+order_service = DfpServices.order_service()
 
 
 def get_order_service():
@@ -53,7 +54,8 @@ def get_orders_by_advertiser(advertiserId, print_orders=False):
                         name=order['name']
                     )
                     print(msg)
-                statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
+                # statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
+                statement.offset += 20
             else:
                 print('No additional orders found.')
                 break
@@ -61,15 +63,25 @@ def get_orders_by_advertiser(advertiserId, print_orders=False):
     return statement
 
 
-def main(advertiserId):
+def get_app_orders():
+    statement = (ad_manager.StatementBuilder(version=DFP_SERVICE_VERSION)
+                 .Where("status = 'DRAFT' \
+                         AND isArchived = FALSE \
+                         AND name LIKE 'Prebid % iCook_Android_%'"))
+
+    return statement
+
+
+# def main(advertiserId):
+def main():
     orders_approved = 0
 
     order_service = get_order_service()
-    statement = get_orders_by_advertiser(advertiserId)
+    # statement = get_orders_by_advertiser(advertiserId)
+    statement = get_app_orders()
 
     while True:
-        statement_string = statement.ToStatement()
-        response = order_service.getOrdersByStatement(statement_string)
+        response = order_service.getOrdersByStatement(statement.ToStatement())
 
         if 'results' in response and len(response['results']) > 0:
             for order in response['results']:
@@ -82,7 +94,7 @@ def main(advertiserId):
 
             result = order_service.performOrderAction(
                 {'xsi_type': 'ApproveOrders'},
-                statement_string
+                statement.ToStatement()
             )
             if result and int(result['numChanges']) > 0:
                 orders_approved += int(result['numChanges'])
@@ -103,5 +115,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.advertiserId:
-        main(args.advertiserId)
+    # if args.advertiserId:
+    #     main(args.advertiserId)
+    main()
