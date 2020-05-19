@@ -35,10 +35,12 @@ BIDDER_CODES = {
     'Innity': 'innity',
     'OpenX': 'openx',
     'Teads': 'teads',
-    'ucfunnel': 'ucfunnel'
+    'ucfunnel': 'ucfunnel',
+    'Criteo': 'criteo'
 }
 
-PLACEMENT_SIZES_DELIMITER = ','
+# PLACEMENT_SIZES_DELIMITER = ','
+PLACEMENT_SIZES_DELIMITER = ';'
 
 
 def get_order(name):
@@ -164,8 +166,10 @@ def main():
                 actual_sizes[i]
             )
 
+            # debug_log(new_settings)
+
             if not is_order_uploaded(new_settings.DFP_ORDER_NAME):
-                add_new_prebd_partner.main(new_settings)
+                add_new_prebid_partner.main(new_settings)
                 count += 1
 
             # Prevent QuotaError

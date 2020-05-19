@@ -54,7 +54,7 @@ def get_orders_by_advertiser(advertiserId, print_orders=False):
                         name=order['name']
                     )
                     print(msg)
-                # statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
+                statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
                 statement.offset += 20
             else:
                 print('No additional orders found.')
@@ -72,13 +72,13 @@ def get_app_orders():
     return statement
 
 
-# def main(advertiserId):
-def main():
+def main(advertiserId):
+    # def main():
     orders_approved = 0
 
     order_service = get_order_service()
-    # statement = get_orders_by_advertiser(advertiserId)
-    statement = get_app_orders()
+    statement = get_orders_by_advertiser(advertiserId)
+    # statement = get_app_orders()
 
     while True:
         response = order_service.getOrdersByStatement(statement.ToStatement())
@@ -91,6 +91,7 @@ def main():
                         name=order['name'],
                         status=order['status'])
                 print(msg)
+            print(f'Total {len(response["results"])} orders will be apporved')
 
             result = order_service.performOrderAction(
                 {'xsi_type': 'ApproveOrders'},
@@ -103,9 +104,9 @@ def main():
             break
 
     if orders_approved > 0:
-        print('Number of orders approved: %s' % orders_approved)
+        print(f'{orders_approved} orders have been approved')
     else:
-        print('No orders were approved.')
+        print('None of orders approved.')
 
 
 if __name__ == '__main__':
@@ -115,6 +116,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # if args.advertiserId:
-    #     main(args.advertiserId)
-    main()
+    if args.advertiserId:
+        main(args.advertiserId)
+    # main()
