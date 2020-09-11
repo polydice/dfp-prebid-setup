@@ -19,30 +19,24 @@
 """
 
 
-import argparse
 import datetime
 from googleads import ad_manager
 from .services import *
 
 order_service = DfpServices.order_service()
 
-
-def get_order_service():
-    dfp_client = get_client()
-    return dfp_client.GetService('OrderService', version=DFP_SERVICE_VERSION)
+ADVERTISER_ID = 4912556320
 
 
-def get_orders_by_advertiser(advertiserId, print_orders=False):
+def get_orders_by_advertiser(print_orders=False):
     statement = (ad_manager.StatementBuilder(version=DFP_SERVICE_VERSION)
                  .Where("status in ('DRAFT', 'PENDING_APPROVAL') \
                          AND advertiserId = :advertiserId \
-                         AND isArchived = FALSE \
-                         AND name LIKE 'Prebid %'")
-                 .WithBindVariable('advertiserId', advertiserId))
+                         AND isArchived = FALSE")
+                 .WithBindVariable('advertiserId', ADVERTISER_ID))
 
     if print_orders:
         while True:
-            order_service = get_order_service()
             response = order_service.getOrdersByStatement(
                 statement.ToStatement()
             )
@@ -72,12 +66,10 @@ def get_app_orders():
     return statement
 
 
-def main(advertiserId):
-    # def main():
+def main():
     orders_approved = 0
 
-    order_service = get_order_service()
-    statement = get_orders_by_advertiser(advertiserId)
+    statement = get_orders_by_advertiser()
     # statement = get_app_orders()
 
     while True:
@@ -93,13 +85,13 @@ def main(advertiserId):
                 print(msg)
             print(f'Total {len(response["results"])} orders will be apporved')
 
-            result = order_service.performOrderAction(
-                {'xsi_type': 'ApproveOrders'},
-                statement.ToStatement()
-            )
-            if result and int(result['numChanges']) > 0:
-                orders_approved += int(result['numChanges'])
-            statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
+            # result = order_service.performOrderAction(
+            #     {'xsi_type': 'ApproveOrders'},
+            #     statement.ToStatement()
+            # )
+            # if result and int(result['numChanges']) > 0:
+            #     orders_approved += int(result['numChanges'])
+            # statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
         else:
             break
 
@@ -110,12 +102,4 @@ def main(advertiserId):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Approve orders')
-    parser.add_argument('--advertiserId', help='Advertiser / Company ID')
-
-    args = parser.parse_args()
-
-    if args.advertiserId:
-        main(args.advertiserId)
-    # main()
+    main()
