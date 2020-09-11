@@ -3,9 +3,6 @@ from googleads import ad_manager
 from .services import *
 from custom_tasks.parse_sponsorship_items import *
 
-# Set id of the order to get line items from.
-# ORDER_ID = '2695925690'
-
 order_service = DfpServices.order_service()
 line_item_service = DfpServices.line_item_service()
 
@@ -51,17 +48,7 @@ def main(order_id, rate_start_from):
             if item['name'] == target_item_name and item['lineItemType'] == 'SPONSORSHIP':
                 item['name'] = item['name'] + " (DUP)"
                 updated_line_items.append(item)
-            # if item['name'] == target_item_name and line_items[i+1] == f"{target_item_name}0":
-            #     print(item['name'], line_items[i+1]['name'])
 
-        # for line_item in response['results']:
-        #     if not line_item['isArchived']:
-        #         if line_item['costPerUnit']['microAmount'] > 28000000:
-        #             line_item['name'] = line_item['name'] + " (WRONG)"
-        #             updated_line_items.append(line_item)
-
-        # for item in updated_line_items:
-        #     print(item['name'])
         # Update line items remotely.
         line_items = line_item_service.updateLineItems(updated_line_items)
 
