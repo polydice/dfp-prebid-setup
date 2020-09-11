@@ -17,7 +17,7 @@
 import argparse
 from googleads import ad_manager
 from dfp.client import get_client
-from .dfp_settings import *
+from .services import *
 
 
 def get_order_service():
@@ -85,11 +85,11 @@ def archive_orders(order_service, advertiserId, mark):
                     status=order['status'])
                 print(msg)
 
-            result = order_service.performOrderAction(
-                {'xsi_type': 'ArchiveOrders'}, statement_string)
+        result = order_service.performOrderAction(
+            {'xsi_type': 'ArchiveOrders'}, statement_string)
 
-            if result and int(result['numChanges']) > 0:
-                num_orders_archived += int(result['numChanges'])
+        if result and int(result['numChanges']) > 0:
+            num_orders_archived += int(result['numChanges'])
             orders_statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
         else:
             break
