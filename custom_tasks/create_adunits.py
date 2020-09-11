@@ -23,11 +23,13 @@ DFP_USER_EMAIL_ADDRESS = "albert@thepolydice.com"
     THESE arrays is the data copied from spreadsheet given from PM.
 """
 ORDER_DICT = {
-    'KEY': 'VALUE'
+    'FAN': 'Audience Network'
 }
+
 ADVERTISER_DICT = {
-    'KEY': 'VALUE'
+    'FAN': 'Facebook'
 }
+
 BIDDER_CODES = {
     'FAN': 'audienceNetwork',
     'AppNexus': 'appnexus',
@@ -36,11 +38,12 @@ BIDDER_CODES = {
     'OpenX': 'openx',
     'Teads': 'teads',
     'ucfunnel': 'ucfunnel',
-    'Criteo': 'criteo'
+    'Criteo': 'criteo',
+    'IndexExchange': 'ix',
+    'VerizonMedia': 'onemobile'
 }
 
-# PLACEMENT_SIZES_DELIMITER = ','
-PLACEMENT_SIZES_DELIMITER = ';'
+PLACEMENT_SIZES_DELIMITER = ','
 
 
 def get_order(name):
@@ -165,16 +168,19 @@ def main():
                 ad_networks[i],
                 actual_sizes[i]
             )
+            print(f"Sizes: {new_settings.DFP_PLACEMENT_SIZES}")
 
             # debug_log(new_settings)
 
             if not is_order_uploaded(new_settings.DFP_ORDER_NAME):
                 add_new_prebid_partner.main(new_settings)
                 count += 1
+            else:
+                print(f"The order {new_settings.DFP_ORDER_NAME} is uploaded.")
 
             # Prevent QuotaError
             # https://developers.google.com/ad-manager/api/troubleshooting#QuotaError.EXCEEDED_QUOTA
-            time.sleep(1)
+            time.sleep(2)
         except (BadSettingException, MissingSettingException) as error:
             exit(error)
 
