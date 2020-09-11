@@ -2,7 +2,7 @@ from googleads import ad_manager
 from dfp.client import get_client
 
 
-DFP_SERVICE_VERSION = 'v201911'
+DFP_SERVICE_VERSION = 'v202008'
 
 
 class DfpServices:

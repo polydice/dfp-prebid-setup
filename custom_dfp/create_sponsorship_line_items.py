@@ -1,9 +1,10 @@
 
 from sys import exc_info
-from googleads import ad_manager
-
-from dfp.client import get_client
 from pprint import pprint
+
+from .services import *
+
+line_item_service = DfpServices.line_item_service()
 
 
 def create_line_items(line_items):
@@ -15,10 +16,6 @@ def create_line_items(line_items):
     Returns:
       an array: an array of created line item IDs
     """
-    dfp_client = get_client()
-    line_item_service = dfp_client.GetService(
-        'LineItemService', version='v201908')
-
     line_items = line_item_service.createLineItems(line_items)
 
     # Return IDs of created line items.
