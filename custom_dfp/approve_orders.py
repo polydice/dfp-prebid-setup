@@ -25,7 +25,7 @@ from .services import *
 
 order_service = DfpServices.order_service()
 
-ADVERTISER_ID = 4912556320
+ADVERTISER_ID = 4824733092
 
 
 def get_orders_by_advertiser(print_orders=False):
@@ -85,13 +85,13 @@ def main():
                 print(msg)
             print(f'Total {len(response["results"])} orders will be apporved')
 
-            # result = order_service.performOrderAction(
-            #     {'xsi_type': 'ApproveOrders'},
-            #     statement.ToStatement()
-            # )
-            # if result and int(result['numChanges']) > 0:
-            #     orders_approved += int(result['numChanges'])
-            # statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
+            result = order_service.performOrderAction(
+                {'xsi_type': 'ApproveOrders'},
+                statement.ToStatement()
+            )
+            if result and int(result['numChanges']) > 0:
+                orders_approved += int(result['numChanges'])
+            statement.offset += ad_manager.SUGGESTED_PAGE_LIMIT
         else:
             break
 

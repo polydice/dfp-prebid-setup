@@ -40,7 +40,8 @@ BIDDER_CODES = {
     'ucfunnel': 'ucfunnel',
     'Criteo': 'criteo',
     'IndexExchange': 'ix',
-    'VerizonMedia': 'onemobile'
+    'VerizonMedia': 'onemobile',
+    'smaato': 'smaato'
 }
 
 PLACEMENT_SIZES_DELIMITER = ','
